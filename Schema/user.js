@@ -10,4 +10,4 @@ class User{
     }
 }
 
-module.exports=Student;
+module.exports=User;
