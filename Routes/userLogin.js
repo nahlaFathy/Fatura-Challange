@@ -2,7 +2,7 @@ const bcrypt=require('bcrypt')
 const express = require('express');
 const router = express.Router();
 const { body, validationResult } = require('express-validator');
-const User =require('../Operations/user')
+const User =require('../Controller/user')
 const jwt=require('jsonwebtoken');
 
 
@@ -27,7 +27,7 @@ body('Password').isLength({ min: 1 })
     if(validPassword===false) return res.status(403).send('Invalid Email or Password') 
                                                                               
     ///// Generate user token 
-    const token=jwt.sign({ID:myUser.ID},process.env.SECRET_KEY,{ expiresIn: '1h' })
+    const token=jwt.sign({ID:myUser.ID,role:myUser.role},process.env.SECRET_KEY,{ expiresIn: '1h' })
      req.session.user= myUser.ID;
      return res.header('x-user-token',token).send({message:'logined in successfully',
         token:token}) 

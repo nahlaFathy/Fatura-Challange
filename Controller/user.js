@@ -3,6 +3,7 @@ const User=require('../Schema/user');
 const sql = require('mssql/msnodesqlv8')
 const bcrypt = require('bcrypt')
 
+
 async function getUsers(){
     try{
         let users=await pool.request().query("SELECT * from [User]");
@@ -48,49 +49,70 @@ async function addUser(newUser)
        if(if_Exist.recordsets[0].length>0) return {message:"This Email is already registered" ,code:409}
 
         //// hashing password
-        const salt = await bcrypt.genSalt(10);
-      var pass=newUser.Password;
+       const salt = await bcrypt.genSalt(10);
        newUser.Password = await bcrypt.hash(newUser.Password, salt)
-       console.log(await bcrypt.compare(pass,newUser.Password))
-       console.log(newUser.Password)
+      
 
     try{
         
-
+        let role=(newUser.role != undefined && newUser.role != null) ? newUser.role : 'user'
         let user=await pool.request()
         .input("Email",sql.NChar(30),newUser.Email)
         .input("Username",sql.NChar(20),newUser.Username)
         .input("Gender",sql.NChar(10),newUser.Gender)
         .input("Age",sql.Int,newUser.Age)
         .input("Password",sql.VarChar(120),newUser.Password)
-        .query("Insert into [User] Values(@Username,@Email,@Gender,@Age,@Password)")
+        .input("role",sql.VarChar(20),role)
+        .query("Insert into [User] Values(@Username,@Email,@Gender,@Age,@Password,@role)")
         
-        return {message:"User registered successfully " ,code:200};
+        return {message:"User registered successfully " ,code:201};
 
     }
     catch(err){
           return err;
-
-
     }
 }
 
 async function updateUser(id,newUser)
 {
+    /// check if user id is exist 
     let user =await pool.request()
     .input("id",sql.Int,id)
     .query("select * from [User] where ID=@id")
-    if(user.recordsets[0].length==0) return {message:"the user ID is not exist" ,code:404}
 
+    if(user.recordsets[0].length==0) return {message:"the user ID is not exist" ,code:404}
+    
+    /// if user send new password
+    if(newUser.Password != undefined && newUser.Password != null){
+            //// hashing password
+            const salt = await bcrypt.genSalt(10);
+            newUser.Password = await bcrypt.hash(newUser.Password, salt)
+
+    }
+
+     const userData=user.recordsets[0][0];
+    
+     ////// updated data set by request body data else set by the actual data from DB
+     let updatedValues={
+         ID:id,
+         Email:(newUser.Email != undefined && newUser.Email != null) ? newUser.Email : userData.Email,
+         Username:(newUser.Username != undefined && newUser.Username != null) ? newUser.Username : userData.Username,
+         Gender:(newUser.Gender != undefined && newUser.Gender != null) ? newUser.Gender :userData.Gender,
+         Age:(newUser.Age != undefined && newUser.Age != null) ? newUser.Age :userData.Age,
+         Password:(newUser.Password != undefined && newUser.Password != null) ? newUser.Password : userData.Password,
+         role:(newUser.role != undefined && newUser.role != null) ? newUser.role : 'user'
+     }
+     
     try{
-        let updatedStudent=await pool.request()
+        let updatedUser=await pool.request()
         .input("id",sql.Int,id)
-        .input("Email",sql.NChar(20),newUser.Email)
-        .input("Username",sql.NChar(30),newUser.Username)
-        .input("Gender",sql.NChar(10),newUser.Gender)
-        .input("Age",sql.Int,newUser.Age)
-        .input("Password",sql.VarChar(120),newUser.Password)
-        .query("Update [User]  Set Email=@Email, Username=@Username ,Gender=@Gender, Age=@Age, Password=@Password where ID=@id")
+        .input("Email",sql.NChar(20), updatedValues.Email)
+        .input("Username",sql.NChar(30), updatedValues.Username)
+        .input("Gender",sql.NChar(10), updatedValues.Gender)
+        .input("Age",sql.Int, updatedValues.Age)
+        .input("Password",sql.VarChar(120), updatedValues.Password)
+        .input("role",sql.VarChar(20),role)
+        .query("Update [User]  Set Email=@Email, Username=@Username ,Gender=@Gender, Age=@Age, Password=@Password ,role=@role where ID=@id")
         
        return {message:"User Updated Successfuly" ,code:200}
 
@@ -98,8 +120,6 @@ async function updateUser(id,newUser)
     catch(err){
      
           return err;
-
-
     }
 }
 
@@ -122,6 +142,8 @@ async function DeleteUser(id){
      }
 }
 
+
+
 module.exports={
       getUsers,
       getUserById,
@@ -129,4 +151,5 @@ module.exports={
       updateUser,
       DeleteUser,
       getUserByEmail
+     
 }
