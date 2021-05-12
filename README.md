@@ -14,6 +14,7 @@ note : to run this project you should run redis server using (redis-server) comm
    - Creating database with user table 
 
      { 
+
          - ID : Int, primary key ,identity ,not null
          
          - Email : nchar(30) ,not null
