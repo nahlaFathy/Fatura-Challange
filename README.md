@@ -10,6 +10,7 @@ note : to run this project you should run redis server using (redis-server) comm
 
 
 - Develpoing steps : 
+
    - Extract requirments 
    - Creating database with user table 
 
@@ -34,6 +35,7 @@ note : to run this project you should run redis server using (redis-server) comm
    - Create node enviroment using npm "express" framework                        (index.js)
          
    - Create database connection using npm "mssql" and "msnodesqlv8"              (dbConnection.js)
+
       mssql: Microsoft SQL Server client for Node.js used to create a database connection with sql server 
              It enables us to write a sql DQL queries 
       msnodesqlv8 : used to create connection with windowns authentications so there is no need to provide sql server authentication credentials 
@@ -41,6 +43,7 @@ note : to run this project you should run redis server using (redis-server) comm
    - Create user shcema class with its columns names                       (/Schema/user.js)
 
    - Create user operations logic to be used in CRUD routes                (/Controller/user.js)
+
          - used async and await keywords to enable asynchronous by suspending execution until the returned 
            callback or promise is fulfilled or rejected
          - in register check if email is register before or no then used npm "bcrypt" to hashing user password before 
@@ -53,8 +56,10 @@ note : to run this project you should run redis server using (redis-server) comm
          - in logout invalidate user token by add it to blacklist and destroying established session 
          
    - Create user routes to define APIs pathes                        (/Routes/user.js)
+
          - routes created by using express.router => express.router().get(endpoint,callback)
          - routes have some parameters :
+
               - endpoint It’s the value that comes after your domain name 
               - callback tells the server what to do when the requested endpoint matches the endpoint stated
               - optional parameter to add middleware that return a callback 
@@ -92,6 +97,7 @@ note : to run this project you should run redis server using (redis-server) comm
 
 
     In this task I learned  
+
            - using session authentication i used to use tokens only 
            - apply authorization roles and permessions in server-side 
              I apllied it before in client-side
