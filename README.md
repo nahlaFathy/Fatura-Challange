@@ -15,11 +15,17 @@ note : to run this project you should run redis server using (redis-server) comm
 
      { 
          - ID : Int, primary key ,identity ,not null
+         
          - Email : nchar(30) ,not null
+         
          - Username : ncahr(20) ,not null
+         
          - Password : varchar(120) for store hashed password string ,not null
+         
          - Gender : nchar (10) , not null
+         
          - Age : Int , not null
+         
          - role : varchar (20) , not null with default value 'user'
 
      } 
