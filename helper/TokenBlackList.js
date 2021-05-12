@@ -9,9 +9,9 @@ const Blacklist = createBlackList({
   redisOptions: {
     host: 'localhost',
     port: 6379,
-    key: 'jwt-blacklist', // optional: redis key prefix
+    key: process.env.REDIS_KEY, // optional: redis key prefix
   }
+  
 });
-
 
 module.exports = Blacklist;

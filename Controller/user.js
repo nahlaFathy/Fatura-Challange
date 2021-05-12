@@ -5,23 +5,27 @@ const Blacklist = require('../helper/TokenBlackList');
 const jwt = require('jsonwebtoken');
 
 
-exports.getUsers = async (req, res, next) => {
+/* #region get all users */
+exports.getUsers = async (req, res) => {
 
     try {
         let users = await pool.request().query("SELECT * from [User]");
         if (users) return res.send(users.recordsets[0]);
-        else return res.status(404).send("something went wrong")
-
-
+        else return res.status(404).send("something went wrong");
     }
     catch (err) {
         res.send(err);
     }
 }
+/* #endregion */
 
-exports.getUserById = async (req, res, next) => {
+
+/* #region get useer by id */
+exports.getUserById = async (req, res) => {
+    // if request path contain variable in query string so it will be logined id 
+    //else id will be extracted from login user token 
     const loginedID = (req.params.id != null && req.params.id != undefined) ? req.params.id : req.user.ID;
-    console.log(loginedID)
+
     try {
         let user = await pool.request()
             .input("id", sql.Int, loginedID)
@@ -33,10 +37,10 @@ exports.getUserById = async (req, res, next) => {
         res.send(err);
     }
 }
+/* #endregion */
 
-
-
-exports.addUser = async (req, res, next) => {
+/* #region add user */
+exports.addUser = async (req, res) => {
     // check if this email registered before 
     const newUser = req.body
     let if_Exist = await pool.request()
@@ -69,8 +73,10 @@ exports.addUser = async (req, res, next) => {
         return res.send(err);
     }
 }
+/* #endregion */
 
-exports.updateUser = async (req, res, next) => {
+/* #region update user */
+exports.updateUser = async (req, res) => {
     const loginedID = (req.params.id != undefined && req.params.id != null) ? req.params.id : req.user.ID;
     const newUser = req.body;
     /// check if user id is exist 
@@ -121,9 +127,10 @@ exports.updateUser = async (req, res, next) => {
         return res.send(err);
     }
 }
+/* #endregion */
 
-
-exports.DeleteUser = async (req, res, next) => {
+/* #region delete user */
+exports.DeleteUser = async (req, res) => {
     const loginedID = (req.params.id != undefined && req.params.id != null) ? req.params.id : req.user.ID;
     //// check if user id is exist 
     let user = await pool.request()
@@ -136,14 +143,17 @@ exports.DeleteUser = async (req, res, next) => {
             .input("id", sql.Int, loginedID)
             .query("Delete from [User] where ID=@id")
 
-        return res.status(200).send({ message: "User Deleted Successfuly" })
+
+        return res.status(200).redirect('http://localhost:3000/api/logout')
     }
     catch (err) {
         return res.send(err);
     }
 }
+/* #endregion */
 
-exports.logout = async (req, res, next) => {
+/* #region logout */
+exports.logout = async (req, res) => {
     token = req.token;
 
     /// invalidate token by adding it to blacklist
@@ -159,7 +169,10 @@ exports.logout = async (req, res, next) => {
         res.send("Loggedout successfully");
     })
 }
-exports.login = async (req, res, next) => {
+/* #endregion */
+
+/* #region login */
+exports.login = async (req, res) => {
 
 
     ///// check if email is registered before 
@@ -167,7 +180,7 @@ exports.login = async (req, res, next) => {
     let user = await pool.request()
         .input("email", sql.NChar(30), email)
         .query("SELECT * from [User] where Email=@email");
-    console.log(user)
+
     if (user.recordsets[0].length == 0) return res.status(403).send("Invalid Email or Password")
 
 
@@ -180,10 +193,13 @@ exports.login = async (req, res, next) => {
 
     ///// Generate user token and session
     const token = jwt.sign({ ID: myUser.ID, role: myUser.role }, process.env.SECRET_KEY, { expiresIn: '1h' })
-    req.session.user = myUser.ID;
-    req.cookies.user = myUser.ID;
+    // set user session with session id 
+    req.session.user = req.session.id;
+    req.cookies.user = req.session.id;
+
     return res.header('x-user-token', token).send({
         message: 'logined in successfully',
         token: token
     })
 }
+/* #endregion */

@@ -5,13 +5,21 @@ const session = require('express-session');
 let RedisStore = require('connect-redis')(session);
 const app = express();
 const port = 3000;
-require('./dbConnection');
 var cors = require('cors')
-require('dotenv').config();
 var cookieParser = require('cookie-parser')
 const Users = require('./Routes/user');
-const UserLogin = require('./Routes/userLogin')
 const IN_PROD = process.env.NODE_ENV === 'production'
+
+require('./dbConnection');
+require('dotenv').config();
+
+
+/////// check if env variables is set or no /////
+if (!process.env.SECRET_KEY || !process.env.SESSION_SECRET) {
+  console.error('FATAL ERROR: Enviroment keys are not defined !!')
+  ////// 0 exit with succeed otherwisw exit with fail
+  process.exit(1)
+};
 
 /// redis error logs
 let redisClient = redis.createClient();
@@ -28,11 +36,11 @@ app.use((req, res, next) => {
   next()
 });
 
-app.use(express.static('public'));
-app.use(express.json());
-app.use(express.urlencoded({ extended: true }));
-app.use(cors())
-app.use(cookieParser())
+app.use(express.static('public'));                      // store anything in static public file like files or images 
+app.use(express.json());                                // parses incoming requests with JSON payloads and is based on body-parser
+app.use(express.urlencoded({ extended: true }));        // parses incoming requests with urlencoded payloads and is based on body-parser.
+app.use(cors())                                         // used to enable CORS with various options
+app.use(cookieParser())                                 // Parse Cookie header and populate req.cookies with an object keyed by the cookie names.
 
 // initialize express-session to allow us track the logged-in user across sessions.
 app.use(session({
@@ -50,7 +58,6 @@ app.use(session({
 
 //////General Routes
 app.use('/api', Users)
-app.use('/api', UserLogin)
 
 // a global error handler that logs the error 
 app.use((err, req, res, next) => {

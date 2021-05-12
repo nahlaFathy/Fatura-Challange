@@ -5,11 +5,14 @@ const { body, validationResult } = require('express-validator');
 const registerValidationRules = () => {
     return [
         body('Email').isEmail().withMessage("Invalid Email")          ///// request body validation
-            .exists().withMessage('Email is required'),
+            .exists().withMessage('Email is required')
+            .isLength({max:30}).withMessage('Email max length is 30'),
         body('Username').exists()
-            .withMessage('Username is required'),
+            .withMessage('Username is required')
+            .isLength({max:20}).withMessage('Username max length is 20'),
         body('Gender').exists()
-            .withMessage('Gender is required'),
+            .withMessage('Gender is required')
+            .isLength({max:10}).withMessage('Gender max length is 10'),
         body('Age').isNumeric().withMessage("age must be a number").exists()
             .withMessage('Age is required'),
         body('Password').isLength({ min: 5 })
@@ -30,7 +33,8 @@ const validateRegister = async (req, res, next) => {
 const LoginValidationRules = () => {
     return [
         body('Email').exists()
-            .withMessage('Email is required').isEmail().withMessage("Invalid Email"),
+            .withMessage('Email is required')
+            .isEmail().withMessage("Invalid Email"),
         body('Password').exists()
             .withMessage('Password is required')
 

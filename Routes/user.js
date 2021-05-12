@@ -39,6 +39,9 @@ router.delete('/user', jwtauth, sessionauth, roles.grantAccess('deleteOwn', 'pro
 router.delete('/user/:id', jwtauth, sessionauth, roles.grantAccess('deleteAny', 'profile'), User.DeleteUser)
 
 
+/// login
+router.post("/login", validate.LoginValidationRules(), validate.validateLogin, User.login)
+
 /// logout
 router.get('/logout', jwtauth, sessionauth, User.logout)
 
