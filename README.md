@@ -102,6 +102,9 @@ note : to run this project you should run redis server using (redis-server) comm
            - apply authorization roles and permessions in server-side 
              I apllied it before in client-side
            - create API documentation 
+
+
+   I created roles as one to one relationship so as an enhancement I can make  one to many relationship (one user has many roles) but that depend on business model
              
 
 
